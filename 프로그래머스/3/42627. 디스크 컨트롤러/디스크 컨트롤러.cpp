@@ -1,41 +1,44 @@
 #include <string>
 #include <vector>
-#include <algorithm>
+#include <bits/stdc++.h>
 
 using namespace std;
 
-bool cmp(pair<int,int> p1, pair<int,int> p2){
-    int a = p1.second - p1.first;
-    int b = p2.second - p2.first;
-    if(a == b) return p1.first < p2.first;
-    else return a < b;
+// jobs를 요청시각 오름차순으로 정렬
+bool cmp(const vector<int>& v1, const vector<int>& v2){
+    return v1[0] < v2[0];
 }
 
-vector<int> solution(vector<int> sequence, int k) {
-    vector<pair<int,int>> result;
-    int length = sequence.size();
-    int left_idx = 0;
-    int right_idx = 0;
-    int sum = sequence[0];
-    while(left_idx < length){
-        if(sum == k){
-            result.push_back({left_idx, right_idx});
-            sum -= sequence[left_idx];
-            left_idx++;
+int solution(vector<vector<int>> jobs) {
+    int total_time = 0;
+    // {소요시간, 요청시각} 소요시간 기준 최소힙
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+    
+    sort(jobs.begin(), jobs.end(), cmp); // 0,3 / 3,5 / 1,9 
+    
+    int n = jobs.size();
+    int idx = 0; // jobs 순회 포인터
+    int cur_time = 0; // 현재 시각
+    
+    while(idx < n || !pq.empty()){
+        while(idx < n && jobs[idx][0] <= cur_time){
+            pq.push({jobs[idx][1],jobs[idx][0]});
+            idx++;
         }
-        else if(sum < k){
-            if(right_idx == length - 1) break; // right가 끝에 도달
-            right_idx++;
-            sum += sequence[right_idx];
+        if(!pq.empty()){
+            auto [elapsed_time, request_time] = pq.top();
+            pq.pop();
+            cur_time += elapsed_time;
+            total_time += cur_time - request_time;
         }
-        else if(sum > k){
-            sum -= sequence[left_idx];
-            left_idx++;
+        else{
+            // 처리할 작업 없으면 다음 요청시각으로 점프
+            cur_time = jobs[idx][0];
         }
     }
-    if(result.size() == 1) return vector<int>{result[0].first, result[0].second};
     
-    sort(result.begin(), result.end(), cmp); // 길이가 짧은게 앞으로 오도록
     
-    return vector<int>{result[0].first, result[0].second};
+    return total_time / n;
+
+    
 }
