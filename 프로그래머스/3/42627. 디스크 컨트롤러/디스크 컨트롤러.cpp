@@ -1,43 +1,41 @@
 #include <string>
 #include <vector>
-#include <bits/stdc++.h>
+#include <algorithm>
 
 using namespace std;
 
-
-bool cmp(const vector<int>& v1, const vector<int>& v2){
-    return v1[0] < v2[0];
+bool cmp(pair<int,int> p1, pair<int,int> p2){
+    int a = p1.second - p1.first;
+    int b = p2.second - p2.first;
+    if(a == b) return p1.first < p2.first;
+    else return a < b;
 }
 
-int solution(vector<vector<int>> jobs) {
-    int total_time = 0;
-    // 소요시간, 요청시간 순
-    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
-    
-    sort(jobs.begin(), jobs.end(), cmp); // 0,3 / 3,5 / 1,9 
-    
-    int n = jobs.size();
-    int idx = 0;
-    int cur_time = 0;
-    
-    while(idx < n || !pq.empty()){
-        while(idx < n && jobs[idx][0] <= cur_time){
-            pq.push({jobs[idx][1],jobs[idx][0]});
-            idx++;
+vector<int> solution(vector<int> sequence, int k) {
+    vector<pair<int,int>> result;
+    int length = sequence.size();
+    int left_idx = 0;
+    int right_idx = 0;
+    int sum = sequence[0];
+    while(left_idx < length){
+        if(sum == k){
+            result.push_back({left_idx, right_idx});
+            sum -= sequence[left_idx];
+            left_idx++;
         }
-        if(!pq.empty()){
-            auto [elapsed_time, request_time] = pq.top();
-            pq.pop();
-            cur_time += elapsed_time;
-            total_time += cur_time - request_time;
+        else if(sum < k){
+            if(right_idx == length - 1) break; // right가 끝에 도달
+            right_idx++;
+            sum += sequence[right_idx];
         }
-        else{
-            cur_time = jobs[idx][0];
+        else if(sum > k){
+            sum -= sequence[left_idx];
+            left_idx++;
         }
     }
+    if(result.size() == 1) return vector<int>{result[0].first, result[0].second};
     
+    sort(result.begin(), result.end(), cmp); // 길이가 짧은게 앞으로 오도록
     
-    return total_time / n;
-
-    
+    return vector<int>{result[0].first, result[0].second};
 }
