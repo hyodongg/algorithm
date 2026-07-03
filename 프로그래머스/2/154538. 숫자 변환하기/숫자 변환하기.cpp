@@ -1,31 +1,33 @@
-#include <string>
 #include <vector>
-#include <bits/stdc++.h>
+#include <queue>
 
 using namespace std;
 
 int solution(int x, int y, int n) {
-    if(x == y) return 0;
+    // x와 y가 같으면 시작하자마자 0 반환
+    if (x == y) return 0;
     
-    queue<pair<int,int>> q;
-    vector<bool> visited(1000001,false);
+    vector<int> dist(y + 1, -1);
+    queue<int> q;
     
-    q.push({x,0});
-    visited[x] = true;
+    q.push(x);
+    dist[x] = 0;
     
     while(!q.empty()){
-        auto [cur, cnt] = q.front();
-        q.pop();
+        int cur = q.front();
+        q.pop(); // 큐에서 빼는 위치는 보통 맨 앞쪽으로 빼두는 것이 안전하고 깔끔함.
         
-        int next_nums[3] = {cur + n, cur * 2, cur * 3};
+        vector<int> v = {cur + n, cur * 2, cur * 3};
         
-        for(int next_num : next_nums){
-            if(next_num == y) return cnt + 1;
+        for(int next : v){
+            if(next > y) continue;         // 범위를 벗어났는지 먼저 확인
+            if(dist[next] != -1) continue; // 범위 안이라면, 방문했는지 확인
             
-            if(next_num < y && !visited[next_num]){
-                q.push({next_num, cnt + 1});
-                visited[next_num] = true;
-            }
+            // 정답을 찾았다면 큐에 넣을 필요 없이 바로 횟수 반환
+            if(next == y) return dist[cur] + 1;
+            
+            q.push(next);
+            dist[next] = dist[cur] + 1;
         }
     }
     
