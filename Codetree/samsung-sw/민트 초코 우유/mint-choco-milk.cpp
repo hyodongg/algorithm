@@ -11,6 +11,8 @@ int dc[4] = {0, 0, -1, 1};
 int N, T;
 vector<vector<string>> food; // 신봉 음식
 vector<vector<int>> mind; // 신앙심
+vector<vector<pair<int,int>>> groups; // 신봉음식 같은 그룹들의 모음
+
 
 void debugFood(){
     for(int i = 0; i < N; i++){
@@ -31,6 +33,7 @@ void debugMind(){
     cout << "==============" << "\n";
 }
 
+// ==== 아침 ==== //
 void breakfast(){
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
@@ -39,9 +42,10 @@ void breakfast(){
     }
 }
 
- vector<vector<pair<int,int>>> makeGroup(const vector<vector<string>>& food, const vector<vector<int>>& mind){
-    // 신봉음식 같은 그룹들의 모음
-    vector<vector<pair<int,int>>> groups;
+// // ** 오답노트 - 반환값 vector<vector<pair<int,int>>> -> void 
+// ==== 그룹 만들기 ==== //
+void makeGroup(){
+    groups.clear(); // ** 오답노트 ** - 매일 새로 만들어야 함
     vector<vector<bool>> visited(N, vector<bool>(N, false)); // 이미 그룹 생성 된 경우
     queue<pair<int,int>> q;
     for(int i = 0; i < N; i++){
@@ -76,9 +80,9 @@ void breakfast(){
             }
         }
     }
-    return groups;
 }
 
+// ==== 순서 기준 ==== //
 bool cmp(const pair<int,int>& p1, const pair<int,int>& p2){
     int r1 = p1.first; int c1 = p1.second;
     int r2 = p2.first; int c2 = p2.second;
@@ -93,7 +97,7 @@ bool cmp(const pair<int,int>& p1, const pair<int,int>& p2){
 }
 
 // 캡틴 정하고 신앙심 주고 받음
-vector<vector<pair<int,int>>> chooseCaptain(vector<vector<pair<int,int>>>& groups){
+void chooseCaptain(){
     // 그룹마다
     for(int i = 0; i < groups.size(); i++){
         vector<pair<int,int>>& group = groups[i];
@@ -109,19 +113,36 @@ vector<vector<pair<int,int>>> chooseCaptain(vector<vector<pair<int,int>>>& group
             mind[person_r][person_c] -= 1;
         }
     }
-    return groups;
 }
 
-void dinner(vector<vector<pair<int,int>>> sort_groups){
-    // 대표자들 모음
+// ** 오답노트 ** - 비트마스크 활용
+// 민트 T = 1(001), 초코 C = 2(010), 우유 M = 4(100)
+string mergeFood(const string& s1, const string&s2){
+    int mask = 0;
+    string s = s1 + s2;
+    for(char c : s){
+        if(c == 'T') mask |= 1;
+        if(c == 'C') mask |= 2;
+        if(c == 'M') mask |= 4;
+    }
+
+    string result = "";
+    if(mask & 1) result += "T";
+    if(mask & 2) result += "C";
+    if(mask & 4) result += "M";
+    return result;
+}
+
+void dinner(){
+    // 대표자들 모음(각 그룹의 맨 앞이 대표자가 됨)
     vector<pair<int,int>> captain;
-    for(int i = 0; i < sort_groups.size(); i++){
-        captain.push_back({sort_groups[i][0].first, sort_groups[i][0].second});
+    for(int i = 0; i < groups.size(); i++){
+        captain.push_back({groups[i][0].first, groups[i][0].second});
     }
 
     // 대표들을 그룹별로 나눠야함
     // !! 0: 단일 음식, 1: 이중 조합, 2: 삼중 조합 !!
-    vector<vector<pair<int,int>>> captain_group(3);
+    vector<vector<pair<int,int>>> captain_group(3); // ** 오답노트 **
 
     for(int i = 0; i < captain.size(); i++){
         int cur_r = captain[i].first;
@@ -134,8 +155,9 @@ void dinner(vector<vector<pair<int,int>>> sort_groups){
         sort(captain_group[i].begin(), captain_group[i].end(), cmp);
     }
     // 전파
-    //전파 당한지 체크하기 위함
+    // 전파 당한지 체크하기 위함
     vector<vector<bool>> visited(N, vector<bool>(N, false));
+
     for(int i = 0; i < captain_group.size(); i++){
         vector<pair<int,int>> captains = captain_group[i];
         for(int j = 0; j < captains.size(); j++){
@@ -149,7 +171,7 @@ void dinner(vector<vector<pair<int,int>>> sort_groups){
             mind[captain_r][captain_c] = 1;
 
 
-            if(x <= 0) continue; // 간절함이 0이면 애초에 시도 x !!!!!
+            if(x <= 0) continue; // ** 오답노트 ** - 간절함이 0이면 애초에 시도 x 
 
             int nr = captain_r;
             int nc = captain_c;
@@ -175,36 +197,7 @@ void dinner(vector<vector<pair<int,int>>> sort_groups){
                 // 약한 전파
                 else if(x <= y){
                     // 음식 관심
-                    unordered_set<string> us;
-                    for(int k = 0; k < food[captain_r][captain_c].size(); k++){
-                        us.insert(string(1, food[captain_r][captain_c][k]));
-                    }
-                    for(int k = 0; k < food[nr][nc].size(); k++){
-                        us.insert(string(1, food[nr][nc][k]));
-                    }
-                    
-                    if(us.count("T") && us.count("C") && us.count("M")){
-                        food[nr][nc] = "TCM";
-                    }
-                    else if(us.count("C") && us.count("M")){
-                        food[nr][nc] = "CM";
-                    }
-                    else if(us.count("T") && us.count("M")){
-                        food[nr][nc] = "TM";
-                    }
-                    else if(us.count("T") && us.count("C")){
-                        food[nr][nc] = "TC";
-                    }
-                    else if(us.count("T")){
-                        food[nr][nc] = "T";
-                    }
-                    else if(us.count("C")){
-                        food[nr][nc] = "C";
-                    }
-                    else if(us.count("M")){
-                        food[nr][nc] = "M";
-                    }
-                    
+                    food[nr][nc] = mergeFood(food[captain_r][captain_c], food[nr][nc]);
                     // 전파가 간절함 0, 신앙심 x증가
                     mind[nr][nc] += x;
                     x = 0;
@@ -217,12 +210,10 @@ void dinner(vector<vector<pair<int,int>>> sort_groups){
     }
 }
 
-void lunchAndDinner(){
-    vector<vector<pair<int,int>>> groups = makeGroup(food, mind);
-    // 각 그룹의 맨 앞이 대표자인 배열
-    vector<vector<pair<int,int>>> sort_groups = chooseCaptain(groups);
-
-    dinner(sort_groups);
+// ** 오답노트 ** - 인자를 줄임으로써 단순화
+void lunch(){
+    makeGroup();
+    chooseCaptain();
 }
 
 void init(){
@@ -242,6 +233,7 @@ void init(){
     }
 }
 
+/*
 void getSum(){
     unordered_map<string, int> um;
     for(int i = 0; i < N; i++){
@@ -254,17 +246,40 @@ void getSum(){
     << " " << um["CM"] << " " << um["M"] << " " << um["C"] 
     << " " << um["T"] << " " << "\n";
 }
+*/
+
+// 비트마스킹을 이용한 합 구하기
+void getSum(){
+    long long sum[8] = {0};
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            int mask = 0;
+            for(char c : food[i][j]){
+                if(c == 'T') mask |= 1;
+                if(c == 'C') mask |= 2;
+                if(c == 'M') mask |= 4;
+            }
+            sum[mask] += mind[i][j];
+        }
+    }
+    // 민트초코우유, 민트초코, 민트우유, 초코우유, 우유, 초코, 민트 순서
+    int order[7] = {7, 3, 5, 6, 4 , 2, 1};
+
+    for(int k = 0; k < 7; k++){
+        cout << sum[order[k]];
+        if(k < 6) cout << " ";
+    }
+    cout << "\n";
+}
 
 int main() {
     cin >> N >> T;
     init();
-    // debugFood();
-    // debugMind();
     for(int i = 0; i < T; i++){
         breakfast();
-        lunchAndDinner();
+        lunch();
+        dinner();
         getSum();
-        // debugMind();
     }
 
     return 0;
