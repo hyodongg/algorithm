@@ -11,7 +11,7 @@ struct File{
     int origin_idx;
 };
 
-bool cmp(const File& f1,const File& f2){
+bool cmp(const File& f1, const File& f2){
     string head1 = "";
     string head2 = "";
     for(char c : f1.HEAD){
@@ -23,10 +23,18 @@ bool cmp(const File& f1,const File& f2){
     int num1 = stoi(f1.NUMBER);
     int num2 = stoi(f2.NUMBER);
     
-    if(head1 == head2 && num1 == num2) return f1.origin_idx < f2.origin_idx;
-    else if(head1 == head2) return num1 < num2;
-    else return head1 < head2;
+    // HEAD가 다르다면, HEAD를 기준으로 사전순 정렬
+    if(head1 != head2){
+        return head1 < head2;
+    }
     
+    // NUMBER가 다르다면, 숫자 크기순 정렬
+    if(num1 != num2){
+        return num1 < num2;
+    }
+    
+    // HEAD도 같고 NUMBER도 같은 경우 - 들어온 순서(origin_idx) 유지
+    return f1.origin_idx < f2.origin_idx;
 }
 
 vector<string> solution(vector<string> files) {
