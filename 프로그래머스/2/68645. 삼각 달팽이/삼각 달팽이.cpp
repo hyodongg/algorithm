@@ -33,7 +33,7 @@ vector<int> solution(int n) {
     
     vector<int> answer;
     
-    for(const vector<int>& row : board){
+    for(vector<int> row : board){
         for(int col : row){
             if(col != 0){
                 answer.push_back(col);
