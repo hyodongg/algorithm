@@ -4,22 +4,23 @@
 
 using namespace std;
 
-bool dfs(int sum, int num, int n){
+int result;
+
+void dfs(int sum, int num, int n){
     // cout << "dfs " << sum << " " << num << " " << n << " ";
-    if(sum == n) return true;
-    if(sum > n) return false;
+    if(sum == n) {result++; return;}
+    if(sum > n) return;
     
     num += 1;
     sum += num;
-    return dfs(sum, num, n);
+    dfs(sum, num, n);
     
 }
 
 int solution(int n) {
-    int result = 0;
-    
+    result = 0;
     for(int i = 1; i <= n; i++){
-        if(dfs(i, i, n)) result++;
+        dfs(i, i, n);
     }
     
     return result;
