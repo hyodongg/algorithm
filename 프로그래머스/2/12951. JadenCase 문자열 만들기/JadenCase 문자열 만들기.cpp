@@ -8,21 +8,13 @@ string solution(string s) {
     string result = "";
     bool isFirst = true;
     for(char c : s){
-        // 대문자로 바꾸기
         
         if(isFirst){
-            if(isalpha(c)){
-                result.push_back(toupper(c));
-            }
-            else result.push_back(c);
-            
-            isFirst = false;
+            result.push_back(toupper(c));
+
         }
         else {
-            if(isalpha(c)){
-                result.push_back(tolower(c));
-            }
-            else result.push_back(c);
+            result.push_back(tolower(c));
         }
         
         if(c == ' ') isFirst = true;
