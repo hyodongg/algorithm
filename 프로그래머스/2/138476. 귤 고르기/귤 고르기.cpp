@@ -9,25 +9,20 @@ bool cmp(pair<int,int> p1, pair<int,int> p2){
 }
 
 int solution(int k, vector<int> tangerine) {
-    unordered_map<int,int> um; 
+    
+    unordered_map<int,int> um;
     for(int t : tangerine){
         um[t] += 1;
     }
-    vector<pair<int,int>> v; // (1,1) (2,2) 과일크기 - 개수
-    for(auto m : um){
-        v.push_back({m.first, m.second});
-    }
+    vector<pair<int,int>> v(um.begin(), um.end());
     
     sort(v.begin(), v.end(), cmp);
     
     int answer = 0;
     
-    for(auto a : v){
-        if(k <= 0) break; // 성능 향상
-        if(k > 0){
-            k -= a.second;
-            answer++;
-        }
+    for(auto [size, cnt] : v){
+        k -= cnt;
+        answer += 1;
+        if(k <= 0) return answer;
     }
-    return answer;
 }
