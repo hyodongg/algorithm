@@ -6,20 +6,25 @@ using namespace std;
 
 int solution(vector<int> people, int limit) {
     // 오름차순 정렬
-    int answer = 0;
     sort(people.begin(), people.end());
     int left = 0;
-    int right = (int)people.size() - 1;
-    while(left <= right){
-        if(people[right] + people[left] > limit){
-            right--;
-            answer++;
-        }
-        else{
+    int right = people.size() - 1;
+    int answer = 0;
+    
+    while(left <= right){ // 등호?
+        int sum = people[left] + people[right];
+        if(sum <= limit){
+            answer += 1;
             left++;
             right--;
-            answer++;
         }
+        else{
+            answer += 1;
+            right--;
+        }
+        
     }
     return answer;
+    
+    
 }
