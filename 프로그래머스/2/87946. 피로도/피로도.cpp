@@ -5,31 +5,33 @@
 using namespace std;
 
 vector<vector<int>> Dungeons;
-int mx;
+int N;
 vector<bool> visited;
+int answer;
 
-// k는 현재 피로도, cnt는 현재 탐험한 던전의 개수
-void backtrack(int k, int cnt){
-    if(mx < cnt){
-        mx = cnt;
+void dfs(int cur_tired, int cnt){
+    // 종료조건
+    if(cnt > answer) {
+        answer = cnt;
     }
     
-    
-    for(int i = 0; i < Dungeons.size(); i++){
-        // 최소 피로도 조건 만족하고, 아직 방문 안했다면
-        if(k >= Dungeons[i][0] && !visited[i]){
+    for(int i = 0; i < N; i++){
+        if(!visited[i] && cur_tired >= Dungeons[i][0]){
             visited[i] = true;
-            backtrack(k - Dungeons[i][1], cnt + 1);
-            visited[i] = false;  
+            dfs(cur_tired - Dungeons[i][1], cnt + 1);
+            visited[i] = false;
         }
     }
+    
 }
 
-// 최소피로도 - 소모 피로도
+// 최소필요도, 소모필요도
 int solution(int k, vector<vector<int>> dungeons) {
+    answer = 0;
     Dungeons = dungeons;
-    visited.assign(Dungeons.size(), false);
-    mx = 0;
-    backtrack(k, 0);
-    return mx;
+    N = Dungeons.size();
+    visited.assign(N, false);
+    dfs(k, 0);
+    
+    return answer;
 }
